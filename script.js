@@ -1,43 +1,97 @@
-document.getElementById("pokemonForm").addEventListener("submit", async function (event) {
+document.addEventListener("DOMContentLoaded", function () {
+    cargarPokemones();
+});
+
+// Obtener Pokémon desde la API y mostrarlos en la tabla
+function cargarPokemones() {
+    fetch("http://localhost:5000/api/pokemons")
+        .then(response => response.json())
+        .then(pokemons => {
+            const tableBody = document.getElementById("pokemonTableBody");
+            tableBody.innerHTML = ""; // Limpiar la tabla antes de actualizar
+
+            pokemons.forEach(pokemon => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${pokemon.id}</td>
+                    <td>${pokemon.nombre}</td>
+                    <td>${pokemon.tipo}</td>
+                    <td>${pokemon.nivel}</td>
+                    <td>${pokemon.habilidades}</td>
+                    <td>${pokemon.peso}</td>
+                    <td>${pokemon.altura}</td>
+                    <td>${pokemon.genero}</td>
+                    <td>${pokemon.region}</td>
+                    <td>
+                        <button class="edit-btn" onclick="editarPokemon(${pokemon.id})">Editar</button>
+                        <button class="delete-btn" onclick="eliminarPokemon(${pokemon.id})">Eliminar</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => console.error("Error al cargar los pokémones:", error));
+}
+
+// Agregar un nuevo Pokémon
+document.getElementById("pokemonForm").addEventListener("submit", function (event) {
     event.preventDefault();
 
-    const nombre = document.getElementById("nombre").value;
-    const tipo = document.getElementById("tipo").value;
-    const nivel = parseInt(document.getElementById("nivel").value);
-    const habilidades = document.getElementById("habilidades").value;
-    const peso = parseFloat(document.getElementById("peso").value);
-    const altura = parseFloat(document.getElementById("altura").value);
-    const genero = document.getElementById("genero").value;
-    const region = document.getElementById("region").value;
-
     const nuevoPokemon = {
-        nombre,
-        tipo,
-        nivel,
-        habilidades,
-        peso,
-        altura,
-        genero,
-        region
+        nombre: document.getElementById("nombre").value,
+        tipo: document.getElementById("tipo").value,
+        nivel: parseInt(document.getElementById("nivel").value),
+        habilidades: document.getElementById("habilidades").value,
+        peso: parseFloat(document.getElementById("peso").value),
+        altura: parseFloat(document.getElementById("altura").value),
+        genero: document.getElementById("genero").value,
+        region: document.getElementById("region").value,
     };
 
-    try {
-        const response = await fetch("http://localhost:5000/api/pokemons", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(nuevoPokemon)
-        });
-
-        if (response.ok) {
-            alert("Pokémon agregado exitosamente!");
-            document.getElementById("pokemonForm").reset();
-        } else {
-            const errorData = await response.json();
-            alert("Error al agregar el Pokémon: " + errorData.error);
-        }
-    } catch (error) {
-        alert("Error de conexión con el servidor: " + error.message);
-    }
+    fetch("http://localhost:5000/api/pokemons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevoPokemon)
+    })
+    .then(response => response.json())
+    .then(() => {
+        alert("Pokémon agregado exitosamente");
+        cargarPokemones(); // Recargar la lista
+        document.getElementById("pokemonForm").reset();
+    })
+    .catch(error => console.error("Error al agregar Pokémon:", error));
 });
+
+// Editar Pokémon
+function editarPokemon(id) {
+    const nuevoNombre = prompt("Ingrese el nuevo nombre del Pokémon:");
+    if (!nuevoNombre) return;
+
+    fetch(`http://localhost:5000/api/pokemons/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: nuevoNombre })
+    })
+    .then(response => response.json())
+    .then(() => {
+        alert("Pokémon actualizado correctamente");
+        cargarPokemones();
+    })
+    .catch(error => console.error("Error al actualizar Pokémon:", error));
+}
+
+// Eliminar Pokémon
+function eliminarPokemon(id) {
+    if (!confirm("¿Estás seguro de que deseas eliminar este Pokémon?")) return;
+
+    fetch(`http://localhost:5000/api/pokemons/${id}`, {
+        method: "DELETE"
+    })
+    .then(response => response.json())
+    .then(() => {
+        alert("Pokémon eliminado correctamente");
+        cargarPokemones();
+    })
+    .catch(error => console.error("Error al eliminar Pokémon:", error));
+}
+
