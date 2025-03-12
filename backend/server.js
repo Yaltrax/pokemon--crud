@@ -1,97 +1,22 @@
-document.addEventListener("DOMContentLoaded", function () {
-    cargarPokemones();
+const express = require("express");
+const cors = require("cors");
+const sequelize = require("./config/database");
+const pokemonRoutes = require("./routes/pokemonRoutes");
+
+const app = express();
+
+app.use(express.json());
+app.use(cors());
+
+app.use("/api/pokemons", pokemonRoutes);
+
+sequelize.sync()
+    .then(() => console.log("Base de datos conectada y sincronizada"))
+    .catch(error => console.error("Error al conectar la base de datos:", error));
+
+const PORT = 5000;
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
 
-// Obtener Pokémon desde la API y mostrarlos en la tabla
-function cargarPokemones() {
-    fetch("http://localhost:5000/api/pokemons")
-        .then(response => response.json())
-        .then(pokemons => {
-            const tableBody = document.getElementById("pokemonTableBody");
-            tableBody.innerHTML = ""; // Limpiar la tabla antes de actualizar
-
-            pokemons.forEach(pokemon => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${pokemon.id}</td>
-                    <td>${pokemon.nombre}</td>
-                    <td>${pokemon.tipo}</td>
-                    <td>${pokemon.nivel}</td>
-                    <td>${pokemon.habilidades}</td>
-                    <td>${pokemon.peso}</td>
-                    <td>${pokemon.altura}</td>
-                    <td>${pokemon.genero}</td>
-                    <td>${pokemon.region}</td>
-                    <td>
-                        <button class="edit-btn" onclick="editarPokemon(${pokemon.id})">Editar</button>
-                        <button class="delete-btn" onclick="eliminarPokemon(${pokemon.id})">Eliminar</button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        })
-        .catch(error => console.error("Error al cargar los pokémones:", error));
-}
-
-// Agregar un nuevo Pokémon
-document.getElementById("pokemonForm").addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    const nuevoPokemon = {
-        nombre: document.getElementById("nombre").value,
-        tipo: document.getElementById("tipo").value,
-        nivel: parseInt(document.getElementById("nivel").value),
-        habilidades: document.getElementById("habilidades").value,
-        peso: parseFloat(document.getElementById("peso").value),
-        altura: parseFloat(document.getElementById("altura").value),
-        genero: document.getElementById("genero").value,
-        region: document.getElementById("region").value,
-    };
-
-    fetch("http://localhost:5000/api/pokemons", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nuevoPokemon)
-    })
-    .then(response => response.json())
-    .then(() => {
-        alert("Pokémon agregado exitosamente");
-        cargarPokemones(); // Recargar la lista
-        document.getElementById("pokemonForm").reset();
-    })
-    .catch(error => console.error("Error al agregar Pokémon:", error));
-});
-
-// Editar Pokémon
-function editarPokemon(id) {
-    const nuevoNombre = prompt("Ingrese el nuevo nombre del Pokémon:");
-    if (!nuevoNombre) return;
-
-    fetch(`http://localhost:5000/api/pokemons/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre: nuevoNombre })
-    })
-    .then(response => response.json())
-    .then(() => {
-        alert("Pokémon actualizado correctamente");
-        cargarPokemones();
-    })
-    .catch(error => console.error("Error al actualizar Pokémon:", error));
-}
-
-// Eliminar Pokémon
-function eliminarPokemon(id) {
-    if (!confirm("¿Estás seguro de que deseas eliminar este Pokémon?")) return;
-
-    fetch(`http://localhost:5000/api/pokemons/${id}`, {
-        method: "DELETE"
-    })
-    .then(response => response.json())
-    .then(() => {
-        alert("Pokémon eliminado correctamente");
-        cargarPokemones();
-    })
-    .catch(error => console.error("Error al eliminar Pokémon:", error));
-}
 

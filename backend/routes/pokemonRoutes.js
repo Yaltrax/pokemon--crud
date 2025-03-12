@@ -4,11 +4,10 @@ const pokemonController = require("../controllers/pokemonController");
 
 const router = express.Router();
 
-// Validaciones antes de crear un Pokémon
 router.post(
-    "/pokemons",
+    "/",
     [
-        check("nombre").isString().trim().escape().matches(/^[a-zA-Z0-9\sáéíóúÁÉÍÓÚñÑ.,-]+$/),
+        check("nombre").isString().trim().escape().matches(/^[a-zA-Z0-9\sáéíóúÁÉÍÓÚÑñ.,-]+$/),
         check("tipo").isString().trim().escape(),
         check("nivel").isInt({ min: 1 }),
         check("habilidades").isString().trim().escape(),
@@ -26,7 +25,13 @@ router.post(
     }
 );
 
+router.get("/", pokemonController.getPokemons);
+router.get("/:id", pokemonController.getPokemonById);
+router.put("/:id", pokemonController.updatePokemon);
+router.delete("/:id", pokemonController.deletePokemon);
+
 module.exports = router;
+
 
 
 

@@ -2,13 +2,13 @@ document.addEventListener("DOMContentLoaded", function () {
     cargarPokemones();
 });
 
-// Obtener Pokémon desde la API y mostrarlos en la tabla
+
 function cargarPokemones() {
     fetch("http://localhost:5000/api/pokemons")
         .then(response => response.json())
         .then(pokemons => {
             const tableBody = document.getElementById("pokemonTableBody");
-            tableBody.innerHTML = ""; // Limpiar la tabla antes de actualizar
+            tableBody.innerHTML = ""; 
 
             pokemons.forEach(pokemon => {
                 const row = document.createElement("tr");
@@ -33,7 +33,7 @@ function cargarPokemones() {
         .catch(error => console.error("Error al cargar los pokémones:", error));
 }
 
-// Agregar un nuevo Pokémon
+
 document.getElementById("pokemonForm").addEventListener("submit", function (event) {
     event.preventDefault();
 
@@ -56,13 +56,13 @@ document.getElementById("pokemonForm").addEventListener("submit", function (even
     .then(response => response.json())
     .then(() => {
         alert("Pokémon agregado exitosamente");
-        cargarPokemones(); // Recargar la lista
+        cargarPokemones(); 
         document.getElementById("pokemonForm").reset();
     })
     .catch(error => console.error("Error al agregar Pokémon:", error));
 });
 
-// Editar Pokémon
+
 function editarPokemon(id) {
     const nuevoNombre = prompt("Ingrese el nuevo nombre del Pokémon:");
     if (!nuevoNombre) return;
@@ -80,7 +80,7 @@ function editarPokemon(id) {
     .catch(error => console.error("Error al actualizar Pokémon:", error));
 }
 
-// Eliminar Pokémon
+
 function eliminarPokemon(id) {
     if (!confirm("¿Estás seguro de que deseas eliminar este Pokémon?")) return;
 
